@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Revue Médicale de l'Uele</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 15px;
+        }
+        header img {
+            max-width: 100px;
+            display: block;
+            margin: 0 auto 10px;
+        }
+        nav {
+            display: flex;
+            justify-content: center;
+            background-color: #444;
+            padding: 10px;
+        }
+        nav a {
+            color: white;
+            margin: 0 15px;
+            text-decoration: none;
+        }
+        .container {
+            width: 80%;
+            margin: auto;
+            padding: 20px;
+        }
+        .search-bar {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .search-bar input {
+            padding: 10px;
+            width: 50%;
+        }
+        .article-list {
+            list-style: none;
+            padding: 0;
+        }
+        .article-list li {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .comment-section {
+            margin-top: 20px;
+        }
+        .comment {
+            border-bottom: 1px solid #ccc;
+            padding: 10px;
+        }
+        footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <img src="LOGO UNIUELE.JPG" alt="Logo Université de l'Uele">
+        <h1>REVUE MEDICALE DE L'UELE</h1>
+    </header>
+    <nav>
+        <a href="#">Accueil</a>
+        <a href="#articles">Articles</a>
+        <a href="#soumission">Soumettre un article</a>
+        <a href="#comite">Comité éditorial</a>
+        <a href="#contact">Contact</a>
+        <a href="login.php">Administration</a>
+    </nav>
+    <div class="container">
+        <div class="search-bar">
+            <input type="text" id="search" placeholder="Rechercher un article...">
+            <button onclick="rechercher()">Rechercher</button>
+        </div>
+        <section id="articles">
+            <h2>Articles Récents</h2>
+            <ul class="article-list">
+                <?php
+                session_start();
+                $conn = new mysqli("localhost", "root", "", "revue_medicale");
+                if ($conn->connect_error) {
+                    die("Connexion échouée: " . $conn->connect_error);
+                }
+                $sql = "SELECT id, title, author, pdf FROM articles WHERE status='approuve' ORDER BY id DESC";
+                $result = $conn->query($sql);
+                if ($result->num_rows > 0) {
+                    while ($row = $result->fetch_assoc()) {
+                        echo "<li><strong>Titre :</strong> " . $row["title"] . " <br><strong>Auteur :</strong> " . $row["author"] . " <br><a href='uploads/" . $row["pdf"] . "'>Télécharger PDF</a></li>";
+                        echo "<div class='comment-section'>
+                                <h3>Commentaires</h3>
+                                <form action='comment.php' method='post'>
+                                    <input type='hidden' name='article_id' value='" . $row["id"] . "'>
+                                    <input type='text' name='username' placeholder='Votre nom' required>
+                                    <textarea name='comment' placeholder='Votre commentaire' required></textarea>
+                                    <button type='submit'>Commenter</button>
+                                </form>
+                              </div>";
+                    }
+                } else {
+                    echo "<li>Aucun article disponible.</li>";
+                }
+                $conn->close();
+                ?>
+            </ul>
+        </section>
+        <section id="soumission">
+            <h2>Soumission d'Articles</h2>
+            <form action="upload.php" method="post" enctype="multipart/form-data">
+                <input type="text" name="author" placeholder="Nom de l'auteur" required><br>
+                <input type="email" name="email" placeholder="Email" required><br>
+                <input type="text" name="title" placeholder="Titre de l'article" required><br>
+                <input type="file" name="pdf" required><br>
+                <textarea name="summary" placeholder="Résumé de l'article" required></textarea><br>
+                <button type="submit">Soumettre</button>
+            </form>
+        </section>
+        <section id="comite">
+            <h2>Comité Éditorial</h2>
+            <p>Liste des membres du comité...</p>
+        </section>
+        <section id="contact">
+            <h2>Contact</h2>
+            <p>Email : revuemeduniuele@gmail.com</p>
+            <p>Téléphone : +243 817 337 918</p>
+        </section>
+    </div>
+    <footer>
+        <p>&copy; 2024 Revue Médicale de l'Uele</p>
+    </footer>
+</body>
+</html>
